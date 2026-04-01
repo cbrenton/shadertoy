@@ -14,19 +14,14 @@ fn main() {
         .expect("event loop building");
     let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new().build(&event_loop);
 
-    let vertex1 = Vertex {
-        position: [-0.5, -0.5],
-    };
-    let vertex2 = Vertex {
-        position: [0.0, 0.5],
-    };
-    let vertex3 = Vertex {
-        position: [0.5, -0.25],
-    };
-    let shape = vec![vertex1, vertex2, vertex3];
+    let positions = [[-0.5, -0.5], [0.0, 0.5], [0.5, -0.25]];
+    let mut tris = vec![];
+    for position in positions {
+        tris.push(Vertex { position });
+    }
 
     // upload vertices to vertex buffer
-    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+    let vertex_buffer = glium::VertexBuffer::new(&display, &tris).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     let vert_shader_src = r#"
