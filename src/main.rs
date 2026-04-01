@@ -1,4 +1,7 @@
 use glium::Surface;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -24,15 +27,24 @@ fn main() {
     let vertex_buffer = glium::VertexBuffer::new(&display, &tris).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let vert_shader_src = r#"
-    #version 140
+    // read vert shader from file
 
-    in vec2 position;
+    // create a path to the desired file
+    let path = Path::new("./resources/shaders/hello_vert.glsl");
+    let path_display = path.display();
 
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-    }
-"#;
+    // open path in RO mode, returns `io::Result<File>`
+    let mut file = match File::open(&path) {
+        Err(why) => panic!("couldn't open {}: {}", path_display, why),
+        Ok(file) => file,
+    };
+
+    // read file contents into a string, returns `io::Result<usize>`
+    let mut vert_shader_src = String::new();
+    match file.read_to_string(&mut vert_shader_src) {
+        Err(why) => panic!("couldn't read {}: {}", path_display, why),
+        Ok(_) => (),
+    };
 
     let frag_shader_src = r#"
     #version 140
@@ -45,7 +57,7 @@ fn main() {
 "#;
 
     let program =
-        glium::Program::from_source(&display, vert_shader_src, frag_shader_src, None).unwrap();
+        glium::Program::from_source(&display, &vert_shader_src, frag_shader_src, None).unwrap();
 
     let mut target = display.draw();
     target.clear_color(0.0, 0.0, 1.0, 1.0);
